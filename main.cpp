@@ -11,8 +11,9 @@ using namespace std;
 int main(){
     NODE_SET nodes;
     nodes.printinsert=true;
-    nodes.count = 7;
-    nodes.datas = new int[nodes.count]{5,18,12,25,31,9,8};
+    nodes.count = 8;
+    //nodes.datas = new int[nodes.count]{'A','H','F','D','C','B','E','G'};
+    nodes.datas = new int[nodes.count]{5,18,12,25,31,9,8,2};
     LISCH hash = LISCH(13,&nodes);
     hash.printNode();
     //play

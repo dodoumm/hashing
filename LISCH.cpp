@@ -140,12 +140,13 @@ void LISCH::del_start(int s){
     }
     if(r==EMPTY){//HASH가 s인 원소를 찾지 못함
         //그냥 삭제
-        this->log("deleted as single");
+        this->log("deleted as case [1][start]");
         this->DATA[s].data = EMPTY;
         this->DATA[s].link = EMPTY;
         return;
     }
     //r을 s로 복사하고 r을 삭제
+    this->log("deleted as case [2][start]");
     this->DATA[s].data = this->DATA[r].data;
     this->DATA[s].link = this->DATA[r].link;
     this->del_middle(r,p);
