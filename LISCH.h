@@ -1,10 +1,13 @@
 #pragma once
-#define NONE -1
+#include <iostream>
+using namespace std;
+
+#define EMPTY -1
 
 
 typedef struct NODE{
-    int data=NONE;
-    int link=NONE;
+    int data=EMPTY;
+    int link=EMPTY;
 } NODE;
 
 typedef struct NODE_SET{
@@ -15,22 +18,24 @@ typedef struct NODE_SET{
 
 typedef struct SEARCH_RES{
     int probe = 0;
-    int index = NONE;
-    int pindex = NONE;
+    int index = EMPTY;
+    int pindex = EMPTY;
 } SEARCH_RES;
 
 
 class LISCH{
     private:
         NODE* DATA;
-        int size=11;
+        const int size=11;
         int R;
+        void log(string log);
         void findR();
         void setR(int R);
-        bool del_start(int s);//s = HASH KEY
-        bool del_middle(int r,int p);//r = DELETE KEY | p = s->PARENT
+        void del_start(int s);//s = HASH KEY
+        void del_middle(int r,int p);//r = DELETE KEY | p = s->PARENT
     public:
         LISCH(int size,NODE_SET *set);
+        ~LISCH();
         int hash(int data);
         NODE get(int h);
         SEARCH_RES searchNode(int data);
