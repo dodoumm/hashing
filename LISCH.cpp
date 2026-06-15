@@ -8,6 +8,15 @@ void LISCH::log(string log){
     cout << ":: "<<log<<endl;
     return;
 }
+void LISCH::printpath(int h){
+    int s = h;
+    cout << h << "("<<this->get(s).data<<")";
+    while(this->get(s).link!=EMPTY){
+        s = this->get(s).link;
+        cout << " -> " << s << "("<<this->get(s).data<<")";
+    }
+    cout << endl<<endl;
+}
 
 LISCH::LISCH(int count,NODE_SET *set=NULL):size(count){
     this->DATA = new NODE[this->size];
@@ -122,7 +131,7 @@ int LISCH::insertNode(int data){
     return probe;
 }
 
-void LISCH::del_start(int s){
+int LISCH::del_start(int s){
     this->log("del_start "+to_string(s));
     int p = EMPTY;//r의 부모 원소
     int r = EMPTY;//s index 의 체인중에 가장 마지막에 있는 HASH가 s인 원소 
@@ -144,18 +153,18 @@ void LISCH::del_start(int s){
         //this->log("=> deleted "+to_string(s)+"\n");
         this->DATA[s].data = EMPTY;
         this->DATA[s].link = EMPTY;
-        return;
+        return s;
     }
     //r을 s로 복사하고 r을 삭제
     this->log("deleted as case [2][start]\n");
     //this->log("=> "+to_string(s)+" link = EMPTY and del_middle("+to_string(r)+","+to_string(p)+")\n");
+    //s와 r사이에는 hash가 s인 원소가 없으므로 r을 s로 옮기고, s뒤~ 은 별도의 체인으로 분리시킴
     this->DATA[s].data = this->DATA[r].data;
     this->DATA[s].link = this->DATA[r].link;
-    this->del_middle(r,p);
-    return;
+    return this->del_middle(r,p);
 }
 
-void LISCH::del_middle(int r,int p){
+int LISCH::del_middle(int r,int p){
     this->log("del_middle "+to_string(r)+" (p="+to_string(p)+")");
     // 1: 중간에 있는 원소만 빼고 앞 뒤 이어주기
     // -> 삭제할 원소의 [index]를 hash(data)로 갖는 레코드가 뒤에 없을때:
@@ -194,22 +203,21 @@ void LISCH::del_middle(int r,int p){
                     this->log("found unincluded hash(data["+to_string(this->get(curr).data)+"])["+to_string(this->hash(this->get(curr).data))+"] in D");
                     this->log("deleted as case [3]\n");
                     //발견한 노드를 r위치로 앞당기고 발견한 노드를 지운다.
-                    NODE foundednode = this->get(curr);
-                    this->DATA[r].data = foundednode.data;
+                    NODE s = this->get(curr);
+                    this->DATA[r].data = s.data;
+                    this->DATA[r].link = s.link;
                     delete[] D;
-                    this->del_middle(curr,prev);
-                    return;
+                    return this->del_middle(curr,prev);
                 }
                 //curr 과 prev를 한칸씩 이동
                 prev = curr;
                 curr = this->get(curr).link;
             }
             // hash(data)가 D에 포함되지 않는 노드가 발견되지 않았으므로 (2) 수행.
+            delete[] D;
             this->log("deleted as case [2]\n");
             this->DATA[p].link = EMPTY;
-            this->del_start(r);//노드의 맨 앞 삭제 판정
-            delete[] D;
-            return;
+            return this->del_start(r);//노드의 맨 앞 삭제 판정;
         }
         //curr를 한칸씩 이동
         curr = this->get(curr).link;
@@ -219,7 +227,7 @@ void LISCH::del_middle(int r,int p){
     this->DATA[p].link = this->get(r).link;
     this->DATA[r].data = EMPTY;
     this->DATA[r].link = EMPTY;
-    return;
+    return r;
 }
 
 bool LISCH::deleteNode(int data){
@@ -227,21 +235,25 @@ bool LISCH::deleteNode(int data){
     if(data < 0) return false;
     SEARCH_RES search = this->searchNode(data);
     if(search.index==EMPTY) return false;
+    int del_index = EMPTY;
     if(data == search.index){
         this->log("data["+to_string(data)+"] = hash(data["+to_string(data)+"])["+to_string(search.index)+"] -> del_start\n");
-        this->del_start(search.index);
+        del_index=this->del_start(search.index);
     }else{
         this->log("data["+to_string(data)+"] ≠ hash(data["+to_string(data)+"])["+to_string(search.index)+"] -> del_middle\n");
-        this->del_middle(search.index,search.pindex);
+        del_index=this->del_middle(search.index,search.pindex);
     }
+    if(del_index>this->R) setR(del_index);
     return true;
 }
 
 void LISCH::printNode(){
-    cout << "HASH | RECORD | VALUE | LINK "<<endl;
+    cout << "R | HASH | RECORD | VALUE | LINK "<<endl;
     for(int i = 0;i<this->size;i++){
         NODE node = this->DATA[i];
-        printf("%-5d  ",i);
+        if(i==this->R){
+            printf("R   %-5d  ",i);
+        }else printf("    %-5d  ",i);
         if(node.data==EMPTY){
             cout << "         ";
             cout << "        ";

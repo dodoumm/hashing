@@ -31,9 +31,11 @@ class LISCH{
         int R;
         void log(string log);
         void findR();
+        void printpath(int h);
         void setR(int R);
-        void del_start(int s);//s = HASH KEY
-        void del_middle(int r,int p);//r = DELETE KEY | p = s->PARENT
+        //삭제 지점(새로생긴 빈공간 index 또는 EMPTY)
+        int del_start(int s);//s = HASH KEY
+        int del_middle(int r,int p);//r = DELETE KEY | p = s->PARENT
     public:
         LISCH(int size,NODE_SET *set);
         ~LISCH();
