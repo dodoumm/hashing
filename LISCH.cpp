@@ -123,7 +123,7 @@ int LISCH::insertNode(int data){
 }
 
 void LISCH::del_start(int s){
-    this->log("del_start:");
+    this->log("del_start "+to_string(s));
     int p = EMPTY;//r의 부모 원소
     int r = EMPTY;//s index 의 체인중에 가장 마지막에 있는 HASH가 s인 원소 
     int prev = s;
@@ -140,13 +140,15 @@ void LISCH::del_start(int s){
     }
     if(r==EMPTY){//HASH가 s인 원소를 찾지 못함
         //그냥 삭제
-        this->log("deleted as case [1][start]");
+        this->log("deleted as case [1][start]\n");
+        //this->log("=> deleted "+to_string(s)+"\n");
         this->DATA[s].data = EMPTY;
         this->DATA[s].link = EMPTY;
         return;
     }
     //r을 s로 복사하고 r을 삭제
-    this->log("deleted as case [2][start]");
+    this->log("deleted as case [2][start]\n");
+    //this->log("=> "+to_string(s)+" link = EMPTY and del_middle("+to_string(r)+","+to_string(p)+")\n");
     this->DATA[s].data = this->DATA[r].data;
     this->DATA[s].link = this->DATA[r].link;
     this->del_middle(r,p);
@@ -154,7 +156,7 @@ void LISCH::del_start(int s){
 }
 
 void LISCH::del_middle(int r,int p){
-    this->log("del_middle:");
+    this->log("del_middle "+to_string(r)+" (p="+to_string(p)+")");
     // 1: 중간에 있는 원소만 빼고 앞 뒤 이어주기
     // -> 삭제할 원소의 [index]를 hash(data)로 갖는 레코드가 뒤에 없을때:
     // => [index]를 hash로 가지는 오버플로우된(파생된) 원소가 없기 때문에 뒤는 신경쓰지 않고 잘라내도 된다. 
@@ -173,21 +175,24 @@ void LISCH::del_middle(int r,int p){
     while(curr!=EMPTY){
         //HASH(data)가 r인 노드 발견시 (2,3) 수행
         if(this->hash(this->get(curr).data) == r){
+            this->log("found hash["+to_string(r)+"] in "+to_string(curr)+"(data="+to_string(this->get(curr).data)+")");
             curr = r;//처음부터 다시 순회
             bool *D = new bool[this->size]();// 뒤의 index 배열
+            string dstring = "";//출력용 텍스트
             while(curr!=EMPTY){
+                dstring += to_string(curr)+", ";
                 D[curr] = true;
                 //curr를 한칸씩 이동
                 curr = this->get(curr).link;
             }
-            this->log("D created");
+            this->log("created D as ["+dstring+"\b\b]");
             int prev = r;
             curr = this->get(r).link;//처음부터 다시 순회
             while(curr!=EMPTY){
                 //hash(data)가 D에 포함되지 않는 노드 발견됨. (3) 수행
                 if(!D[this->hash(this->get(curr).data)]){
-                    this->log("included hash(data) in D");
-                    this->log("deleted as case [3]");
+                    this->log("found unincluded hash(data["+to_string(this->get(curr).data)+"])["+to_string(this->hash(this->get(curr).data))+"] in D");
+                    this->log("deleted as case [3]\n");
                     //발견한 노드를 r위치로 앞당기고 발견한 노드를 지운다.
                     NODE foundednode = this->get(curr);
                     this->DATA[r].data = foundednode.data;
@@ -200,7 +205,7 @@ void LISCH::del_middle(int r,int p){
                 curr = this->get(curr).link;
             }
             // hash(data)가 D에 포함되지 않는 노드가 발견되지 않았으므로 (2) 수행.
-            this->log("deleted as case [2]");
+            this->log("deleted as case [2]\n");
             this->DATA[p].link = EMPTY;
             this->del_start(r);//노드의 맨 앞 삭제 판정
             delete[] D;
@@ -209,7 +214,7 @@ void LISCH::del_middle(int r,int p){
         //curr를 한칸씩 이동
         curr = this->get(curr).link;
     }
-    this->log("deleted as case [1]");
+    this->log("deleted as case [1]\n");
     //HASH(data)가 r인 노드를 못찾았으므로 (1)실행
     this->DATA[p].link = this->get(r).link;
     this->DATA[r].data = EMPTY;
@@ -218,12 +223,15 @@ void LISCH::del_middle(int r,int p){
 }
 
 bool LISCH::deleteNode(int data){
+    this->log("deletenode "+to_string(data));
     if(data < 0) return false;
     SEARCH_RES search = this->searchNode(data);
     if(search.index==EMPTY) return false;
     if(data == search.index){
+        this->log("data["+to_string(data)+"] = hash(data["+to_string(data)+"])["+to_string(search.index)+"] -> del_start\n");
         this->del_start(search.index);
     }else{
+        this->log("data["+to_string(data)+"] ≠ hash(data["+to_string(data)+"])["+to_string(search.index)+"] -> del_middle\n");
         this->del_middle(search.index,search.pindex);
     }
     return true;

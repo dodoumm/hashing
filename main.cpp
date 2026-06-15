@@ -19,8 +19,9 @@ int main(){
     //play
     int command;
     int data;
-    cout << "0 : reload\n1 <int> : 삽입\n2 <int> : 삭제\n3 : LISCH 출력\n\n$ : ";
+    cout << "0 : reload\n1 <int> : 삽입\n2 <int> : 삭제\n3 : LISCH 출력\n\n";
     while(true){
+        cout << "$ : ";
         cin >> command;
         if(command>3) continue;
         switch (command){
